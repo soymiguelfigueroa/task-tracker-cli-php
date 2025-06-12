@@ -10,31 +10,46 @@ if ($option) {
 
             if ($description) {
                 $filename = __DIR__ . DIRECTORY_SEPARATOR . 'tasks.json';
-                $handle = fopen($filename, 'w+');
                 $file_size = filesize($filename);
 
                 if ($file_size > 0) {
+                    $handle = fopen($filename, 'r+');
                     $content = fread($handle, $file_size);
-                    print_r($content);
-                } else {
-                    $date = date('Y-m-d', strtotime('now'));
-
-                    $content = [
-                        'id' => '1',
+                    fclose($handle);
+                    $content_decoded = json_decode($content, true);
+                    $last_task = end($content_decoded);
+                    $last_id = intval($last_task['id']) + 1;
+                    $current_date = date('Y-m-d', strtotime('now'));
+                    $content_decoded[] = (object) [
+                        'id' => $last_id,
                         'description' => $description,
                         'status' => 'todo',
-                        'createdAt' => $date,
-                        'updatedAt' => $date,
+                        'createdAt' => $current_date,
+                        'updatedAt' => $current_date,
+                    ];
+                    $content_encoded = json_encode($content_decoded, JSON_FORCE_OBJECT);
+                    file_put_contents($filename, $content_encoded);
+
+                    echo "The task has been added sucessfully!\n";
+                } else {
+                    $handle = fopen($filename, 'w+');
+                    $current_date = date('Y-m-d', strtotime('now'));
+
+                    $content[] = [
+                        'id' => 1,
+                        'description' => $description,
+                        'status' => 'todo',
+                        'createdAt' => $current_date,
+                        'updatedAt' => $current_date,
                     ];
 
                     $content_encoded = json_encode($content);
 
                     fwrite($handle, $content_encoded);
+                    fclose($handle);
 
-                    echo 'The task has been added sucessfully!';
+                    echo "The task has been added sucessfully!\n";
                 }
-
-                fclose($handle);
             } else {
                 echo "You need to enter the task description\n";
             }
