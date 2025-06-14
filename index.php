@@ -1,5 +1,148 @@
 <?php
 
+/**
+ * Interfaces
+ */
+interface IFile
+{
+    public function getFileSize();
+    public function save($content);
+    public function read();
+}
+
+/**
+ * Classes
+ */
+class JsonFile implements IFile
+{
+    private $filename;
+
+    public function __construct($filename)
+    {
+        $this->filename = $filename;
+    }
+
+    public function getFileSize()
+    {
+        return filesize($this->getFullFilename());
+    }
+
+    public function save($content)
+    {
+        $handle = $this->open(mode: 'w+');
+        
+        $content_encoded = json_encode($content);
+        
+        fwrite($handle, $content_encoded);
+        
+        $this->close($handle);
+    }
+
+    public function read()
+    {
+        $handle = $this->open();
+
+        $filse_size = $this->getFileSize();
+
+        if ($filse_size > 0) {
+            $content = fread($handle, $filse_size);
+        } else {
+            $content = json_encode([]);
+        }
+
+        $this->close($handle);
+
+        return json_decode($content, true);
+    }
+
+    private function open($mode = 'r+')
+    {
+        return fopen(filename: $this->getFullFilename(), mode: $mode);
+    }
+
+    private function close($handle)
+    {
+        return fclose($handle);
+    }
+
+    private function getFullFilename()
+    {
+        return __DIR__ . DIRECTORY_SEPARATOR . $this->filename;
+    }
+}
+
+class Task
+{
+    private $id;
+    private $description;
+    private $status;
+
+    public function __construct($id, $description, $status)
+    {
+        $this->id = $id;
+        $this->description = $description;
+        $this->status = $status;
+    }
+
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    public function getDescription()
+    {
+        return $this->description;
+    }
+
+    public function getStatus()
+    {
+        return $this->status;
+    }
+}
+
+class TaskList
+{
+    private $file;
+    
+    public function __construct(IFile $file)
+    {
+        $this->file = $file;
+    }
+
+    public function add(Task $task)
+    {
+        $tasks = $this->file->read();
+
+        $current_date = date('Y-m-d', strtotime('now'));
+
+        $tasks[] = [
+            'id' => $task->getId(),
+            'description' => $task->getDescription(),
+            'status' => $task->getStatus(),
+            'createdAt' => $current_date,
+            'updatedAt' => $current_date,
+        ];
+
+        $this->file->save($tasks);
+    }
+
+    public function getNextId()
+    {
+        $tasks = $this->file->read();
+
+        if (count($tasks) > 0) {
+            $last_task = end($tasks);
+            
+            return intval($last_task['id']) + 1;
+        } else {
+            return 1;
+        }
+    }
+}
+
+/**
+ * Main
+ */
 $option = $argv[1] ?? null;
 
 if ($option) {
@@ -9,44 +152,20 @@ if ($option) {
             $description = $argv[2] ?? null;
 
             if ($description) {
-                $filename = __DIR__ . DIRECTORY_SEPARATOR . 'tasks.json';
-                $file_size = filesize($filename);
+                $file = new JsonFile('tasks.json');
+                $file_size = $file->getFileSize();
 
                 if ($file_size > 0) {
-                    $handle = fopen($filename, 'r+');
-                    $content = fread($handle, $file_size);
-                    fclose($handle);
-                    $content_decoded = json_decode($content, true);
-                    $last_task = end($content_decoded);
-                    $last_id = intval($last_task['id']) + 1;
-                    $current_date = date('Y-m-d', strtotime('now'));
-                    $content_decoded[] = (object) [
-                        'id' => $last_id,
-                        'description' => $description,
-                        'status' => 'todo',
-                        'createdAt' => $current_date,
-                        'updatedAt' => $current_date,
-                    ];
-                    $content_encoded = json_encode($content_decoded, JSON_FORCE_OBJECT);
-                    file_put_contents($filename, $content_encoded);
+                    $taskList = new TaskList($file);
+                    $nextId = $taskList->getNextId();
+                    $task = new Task(id: $nextId, description: $description, status: 'todo');
+                    $taskList->add($task);
 
                     echo "The task has been added sucessfully!\n";
                 } else {
-                    $handle = fopen($filename, 'w+');
-                    $current_date = date('Y-m-d', strtotime('now'));
-
-                    $content[] = [
-                        'id' => 1,
-                        'description' => $description,
-                        'status' => 'todo',
-                        'createdAt' => $current_date,
-                        'updatedAt' => $current_date,
-                    ];
-
-                    $content_encoded = json_encode($content);
-
-                    fwrite($handle, $content_encoded);
-                    fclose($handle);
+                    $task = new Task(id: 1, description: $description, status: 'todo');
+                    $taskList = new TaskList($file);
+                    $taskList->add($task);
 
                     echo "The task has been added sucessfully!\n";
                 }
