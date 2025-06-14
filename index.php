@@ -138,6 +138,31 @@ class TaskList
             return 1;
         }
     }
+
+    public function getTask($id)
+    {
+        $tasks = $this->file->read();
+
+        foreach ($tasks as $task) {
+            if ($task['id'] == $id) {
+                return $task;
+            }
+        }
+    }
+
+    public function update($task_update)
+    {
+        $tasks = $this->file->read();
+        $current_date = date('Y-m-d', strtotime('now'));
+        foreach ($tasks as &$task) {
+            if ($task['id'] == $task_update['id']) {
+                $task['description'] = $task_update['description'];
+                $task['updatedAt'] = $current_date;
+                break;
+            }
+        }
+        $this->file->save($tasks);
+    }
 }
 
 /**
@@ -175,7 +200,29 @@ if ($option) {
             break;
 
         case 'update':
-            echo "Updating task\n";
+            echo "Updating task...\n";
+            $d = (int) $argv[2] ?? null;
+            $description = $argv[3] ?? null;
+
+            if ($d) {
+                $file = new JsonFile('tasks.json');
+                $file_size = $file->getFileSize();
+                if ($file_size > 0) {
+                    $taskList = new TaskList(file: $file);
+                    $task = $taskList->getTask(id: $d);
+                    if ($task) {
+                        $task['description'] = $description;
+                        $taskList->update($task);
+                        echo "The task has been updated sucessfully!\n";
+                    } else {
+                        echo "Task not found\n";
+                    }
+                } else {
+                    echo "There is no tasks available\n";
+                }
+            } else {
+                echo "The arguments are invalid. You need to set the task id and then the task description\n";
+            }
             break;
 
         case 'delete':
