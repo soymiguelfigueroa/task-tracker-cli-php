@@ -113,7 +113,7 @@ class TaskList
     {
         $tasks = $this->file->read();
 
-        $current_date = date('Y-m-d', strtotime('now'));
+        $current_date = $this->getCurrentDate();
 
         $tasks[] = [
             'id' => $task->getId(),
@@ -153,11 +153,10 @@ class TaskList
     public function update($task_update)
     {
         $tasks = $this->file->read();
-        $current_date = date('Y-m-d', strtotime('now'));
         foreach ($tasks as &$task) {
             if ($task['id'] == $task_update['id']) {
                 $task['description'] = $task_update['description'];
-                $task['updatedAt'] = $current_date;
+                $task['updatedAt'] = $this->getCurrentDate();
                 break;
             }
         }
@@ -179,11 +178,10 @@ class TaskList
     public function markInProgress($task_update)
     {
         $tasks = $this->file->read();
-        $current_date = date('Y-m-d', strtotime('now'));
         foreach ($tasks as &$task) {
             if ($task['id'] == $task_update['id']) {
                 $task['status'] = 'in-progress';
-                $task['updatedAt'] = $current_date;
+                $task['updatedAt'] = $this->getCurrentDate();
                 break;
             }
         }
@@ -193,11 +191,10 @@ class TaskList
     public function markDone($task_update)
     {
         $tasks = $this->file->read();
-        $current_date = date('Y-m-d', strtotime('now'));
         foreach ($tasks as &$task) {
             if ($task['id'] == $task_update['id']) {
                 $task['status'] = 'done';
-                $task['updatedAt'] = $current_date;
+                $task['updatedAt'] = $this->getCurrentDate();
                 break;
             }
         }
@@ -218,6 +215,11 @@ class TaskList
             return $result;
         }
         return $this->file->read();
+    }
+
+    private function getCurrentDate()
+    {
+        return date('Y-m-d H:i:s', strtotime('now'));
     }
 }
 
