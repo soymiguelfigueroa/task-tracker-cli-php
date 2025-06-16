@@ -163,6 +163,18 @@ class TaskList
         }
         $this->file->save($tasks);
     }
+
+    public function delete($task_to_delete)
+    {
+        $tasks = $this->file->read();
+        foreach ($tasks as $id => $task) {
+            if ($task['id'] == $task_to_delete['id']) {
+                unset($tasks[$id]);
+                break;
+            }
+        }
+        $this->file->save($tasks);
+    }
 }
 
 /**
@@ -227,6 +239,27 @@ if ($option) {
 
         case 'delete':
             echo "Deleting task\n";
+            $id = (int) $argv[2] ?? null;
+
+            if ($id) {
+                $file = new JsonFile('tasks.json');
+                $file_size = $file->getFileSize();
+                if ($file_size > 0) {
+                    $taskList = new TaskList(file: $file);
+                    $task = $taskList->getTask(id: $id);
+                    if ($task) {
+                        $taskList->delete($task);
+                        echo "The task has been deleted sucessfully!\n";
+                    } else {
+                        echo "Task not found\n";
+                    }
+                } else {
+                    echo "There is no tasks available\n";
+                }
+            } else {
+                echo "You need to set the task id\n";
+            }
+
             break;
 
         case 'mark':
