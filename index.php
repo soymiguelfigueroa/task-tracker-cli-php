@@ -204,7 +204,7 @@ if ($option) {
             $d = (int) $argv[2] ?? null;
             $description = $argv[3] ?? null;
 
-            if ($d) {
+            if ($d && $description) {
                 $file = new JsonFile('tasks.json');
                 $file_size = $file->getFileSize();
                 if ($file_size > 0) {
