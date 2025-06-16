@@ -266,7 +266,7 @@ if ($option) {
             break;
 
         case 'delete':
-            echo "Deleting task\n";
+            echo "Deleting task...\n";
             $id = (int) $argv[2] ?? null;
 
             if ($id) {
@@ -291,7 +291,7 @@ if ($option) {
             break;
 
         case 'mark-in-progress':
-            echo "Marking task as in progress\n";
+            echo "Marking task as in progress...\n";
             $id = (int) $argv[2] ?? null;
 
             if ($id) {
@@ -315,7 +315,7 @@ if ($option) {
             break;
 
         case 'mark-done':
-            echo "Marking task as done\n";
+            echo "Marking task as done...\n";
             $id = (int) $argv[2] ?? null;
 
             if ($id) {
