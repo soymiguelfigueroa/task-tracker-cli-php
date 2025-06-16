@@ -175,6 +175,20 @@ class TaskList
         }
         $this->file->save($tasks);
     }
+
+    public function markInProgress($task_update)
+    {
+        $tasks = $this->file->read();
+        $current_date = date('Y-m-d', strtotime('now'));
+        foreach ($tasks as &$task) {
+            if ($task['id'] == $task_update['id']) {
+                $task['status'] ='in-progress';
+                $task['updatedAt'] = $current_date;
+                break;
+            }
+        }
+        $this->file->save($tasks);
+    }
 }
 
 /**
@@ -262,7 +276,31 @@ if ($option) {
 
             break;
 
-        case 'mark':
+        case 'mark-in-progress':
+            echo "Marking task as in progress\n";
+            $id = (int) $argv[2] ?? null;
+
+            if ($id) {
+                $file = new JsonFile('tasks.json');
+                $file_size = $file->getFileSize();
+                if ($file_size > 0) {
+                    $taskList = new TaskList(file: $file);
+                    $task = $taskList->getTask(id: $id);
+                    if ($task) {
+                        $taskList->markInProgress($task);
+                        echo "The task has been updated sucessfully!\n";
+                    } else {
+                        echo "Task not found\n";
+                    }
+                } else {
+                    echo "There is no tasks available\n";
+                }
+            } else {
+                echo "You need to set the task id\n";
+            }
+            break;
+
+        case 'mark-done':
             $sub_option = $argv[2] ?? null;
 
             if ($sub_option == 'in-progress') {
