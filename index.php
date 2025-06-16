@@ -204,8 +204,19 @@ class TaskList
         $this->file->save($tasks);
     }
 
-    public function list()
+    public function list($option)
     {
+        if ($option) {
+            $tasks = $this->file->read();
+            $result = [];
+            foreach ($tasks as $task) {
+                if ($task['status'] == $option) {
+                    $result[] = $task;
+                }
+            }
+
+            return $result;
+        }
         return $this->file->read();
     }
 }
@@ -345,18 +356,24 @@ if ($option) {
 
         case 'list':
             echo "Listing tasks...\n";
+            $option = $argv[2] ?? null;
+            
             $file = new JsonFile('tasks.json');
             $file_size = $file->getFileSize();
             if ($file_size > 0) {
                 $taskList = new TaskList(file: $file);
-                $tasks = $taskList->List();
-                foreach ($tasks as $task) {
-                    echo "----------\n";
-                    echo "id: {$task['id']}\n";
-                    echo "description: {$task['description']}\n";
-                    echo "status: {$task['status']}\n";
-                    echo "created at: {$task['createdAt']}\n";
-                    echo "updated at: {$task['updatedAt']}\n";
+                $tasks = $taskList->List($option);
+                if (count($tasks) > 0) {
+                    foreach ($tasks as $task) {
+                        echo "----------\n";
+                        echo "id: {$task['id']}\n";
+                        echo "description: {$task['description']}\n";
+                        echo "status: {$task['status']}\n";
+                        echo "created at: {$task['createdAt']}\n";
+                        echo "updated at: {$task['updatedAt']}\n";
+                    }
+                } else {
+                    echo "There is no tasks available\n";
                 }
             } else {
                 echo "There is no tasks available\n";
