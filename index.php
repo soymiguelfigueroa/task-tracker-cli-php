@@ -30,11 +30,11 @@ class JsonFile implements IFile
     public function save($content)
     {
         $handle = $this->open(mode: 'w+');
-        
+
         $content_encoded = json_encode($content);
-        
+
         fwrite($handle, $content_encoded);
-        
+
         $this->close($handle);
     }
 
@@ -103,7 +103,7 @@ class Task
 class TaskList
 {
     private $file;
-    
+
     public function __construct(IFile $file)
     {
         $this->file = $file;
@@ -132,7 +132,7 @@ class TaskList
 
         if (count($tasks) > 0) {
             $last_task = end($tasks);
-            
+
             return intval($last_task['id']) + 1;
         } else {
             return 1;
@@ -182,7 +182,7 @@ class TaskList
         $current_date = date('Y-m-d', strtotime('now'));
         foreach ($tasks as &$task) {
             if ($task['id'] == $task_update['id']) {
-                $task['status'] ='in-progress';
+                $task['status'] = 'in-progress';
                 $task['updatedAt'] = $current_date;
                 break;
             }
@@ -196,7 +196,7 @@ class TaskList
         $current_date = date('Y-m-d', strtotime('now'));
         foreach ($tasks as &$task) {
             if ($task['id'] == $task_update['id']) {
-                $task['status'] ='done';
+                $task['status'] = 'done';
                 $task['updatedAt'] = $current_date;
                 break;
             }
