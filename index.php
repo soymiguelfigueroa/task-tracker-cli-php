@@ -201,15 +201,15 @@ if ($option) {
 
         case 'update':
             echo "Updating task...\n";
-            $d = (int) $argv[2] ?? null;
+            $id = (int) $argv[2] ?? null;
             $description = $argv[3] ?? null;
 
-            if ($d && $description) {
+            if ($id && $description) {
                 $file = new JsonFile('tasks.json');
                 $file_size = $file->getFileSize();
                 if ($file_size > 0) {
                     $taskList = new TaskList(file: $file);
-                    $task = $taskList->getTask(id: $d);
+                    $task = $taskList->getTask(id: $id);
                     if ($task) {
                         $task['description'] = $description;
                         $taskList->update($task);
