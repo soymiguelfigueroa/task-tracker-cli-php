@@ -244,13 +244,13 @@ if ($option) {
                     $task = new Task(id: $nextId, description: $description, status: 'todo');
                     $taskList->add($task);
 
-                    echo "The task has been added sucessfully!\n";
+                    echo "ask added successfully (ID: {$task->getId()})\n";
                 } else {
                     $task = new Task(id: 1, description: $description, status: 'todo');
                     $taskList = new TaskList($file);
                     $taskList->add($task);
 
-                    echo "The task has been added sucessfully!\n";
+                    echo "ask added successfully (ID: {$task->getId()})\n";
                 }
             } else {
                 echo "You need to enter the task description\n";
