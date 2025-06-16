@@ -203,6 +203,11 @@ class TaskList
         }
         $this->file->save($tasks);
     }
+
+    public function list()
+    {
+        return $this->file->read();
+    }
 }
 
 /**
@@ -339,19 +344,25 @@ if ($option) {
             break;
 
         case 'list':
-            $sub_option = $argv[2] ?? null;
-
-            if ($sub_option == 'in-progress') {
-                echo "Listing in progress tasks\n";
-            } elseif ($sub_option == 'done') {
-                echo "Listing done tasks\n";
-            } elseif ($sub_option == 'todo') {
-                echo "Listing not done tasks\n";
+            echo "Listing tasks...\n";
+            $file = new JsonFile('tasks.json');
+            $file_size = $file->getFileSize();
+            if ($file_size > 0) {
+                $taskList = new TaskList(file: $file);
+                $tasks = $taskList->List();
+                foreach ($tasks as $task) {
+                    echo "----------\n";
+                    echo "id: {$task['id']}\n";
+                    echo "description: {$task['description']}\n";
+                    echo "status: {$task['status']}\n";
+                    echo "created at: {$task['createdAt']}\n";
+                    echo "updated at: {$task['updatedAt']}\n";
+                }
             } else {
-                echo "Listing all tasks\n";
+                echo "There is no tasks available\n";
             }
             break;
-        
+
         default:
             echo "The option is not valid\n";
             break;
